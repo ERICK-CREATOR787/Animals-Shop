@@ -1,46 +1,3 @@
-<<<<<<< HEAD
-FROM php:8.3-apache
-
-# Dependências do sistema
-RUN apt-get update && apt-get install -y \
-    git \
-    curl \
-    zip \
-    unzip \
-    libsqlite3-dev \
-    libpq-dev \
-    libzip-dev \
-    && docker-php-ext-install pdo_sqlite pdo_pgsql pdo_mysql zip
-
-# Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
-WORKDIR /var/www/html
-
-# Copia projeto
-COPY . .
-
-# Instala dependências
-RUN composer install --no-dev --optimize-autoloader
-
-# Permissões Laravel
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 775 /var/www/html/storage \
-    && chmod -R 775 /var/www/html/bootstrap/cache
-
-# Apache rewrite
-RUN a2enmod rewrite
-
-# Config Apache
-COPY .docker/vhost.conf /etc/apache2/sites-available/000-default.conf
-
-# REMOVE CACHE ANTIGO DO LARAVEL
-RUN rm -f bootstrap/cache/*.php
-
-EXPOSE 80
-
-CMD bash -c "php artisan config:clear && php artisan cache:clear && php artisan optimize:clear && php artisan migrate --force && apache2-foreground"
-=======
 # Imagem oficial do PHP com Apache
 FROM php:8.3-apache
 
@@ -82,6 +39,5 @@ RUN rm -f bootstrap/cache/*.php
 
 EXPOSE 80
 
-# CÓDIGO CORRIGIDO: Rodar as migrations ANTES de limpar o cache do banco
+# Comando final: Migra o banco e limpa o cache
 CMD bash -c "php artisan migrate --force && php artisan config:clear && php artisan cache:clear && php artisan optimize:clear && apache2-foreground"
->>>>>>> e21e6dd639086b69d2f8efc880e5e1a93ea6e669
