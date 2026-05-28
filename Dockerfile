@@ -1,3 +1,4 @@
+# Imagem oficial do PHP com Apache
 FROM php:8.3-apache
 
 # Dependências do sistema
