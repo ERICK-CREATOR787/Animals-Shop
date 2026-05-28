@@ -12,32 +12,32 @@ RUN apt-get update && apt-get install -y \
     libzip-dev \
     && docker-php-ext-install pdo_sqlite pdo_pgsql pdo_mysql zip
 
-# Composer
+# Instala o Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
-# Copia projeto
+# Copia todos os arquivos do projeto
 COPY . .
 
-# Instala dependências
+# Instala as dependências do Laravel
 RUN composer install --no-dev --optimize-autoloader
 
-# Permissões Laravel
+# Ajusta as permissões para o servidor web
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 775 /var/www/html/storage \
     && chmod -R 775 /var/www/html/bootstrap/cache
 
-# Apache rewrite
+# Ativa o módulo Rewrite do Apache
 RUN a2enmod rewrite
 
-# Config Apache
+# Copia a configuração do VirtualHost (Onde costuma estar o erro "Menu")
 COPY .docker/vhost.conf /etc/apache2/sites-available/000-default.conf
 
-# REMOVE CACHE ANTIGO DO LARAVEL
+# Limpa caches antigos de arquivos
 RUN rm -f bootstrap/cache/*.php
 
 EXPOSE 80
 
-# Comando final: Migra o banco e limpa o cache
-CMD bash -c "php artisan migrate --force && php artisan config:clear && php artisan cache:clear && php artisan optimize:clear && apache2-foreground"
+# Comando de inicialização: Migra o banco e liga o servidor
+CMD bash -c "php artisan migrate --force && php artisan config:clear && php artisan cache:clear && apache2-foreground"
