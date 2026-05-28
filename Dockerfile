@@ -31,13 +31,17 @@ RUN chown -R www-data:www-data /var/www/html \
 # Ativa o módulo Rewrite do Apache
 RUN a2enmod rewrite
 
-# Copia a configuração do VirtualHost (Onde costuma estar o erro "Menu")
+# Copia a configuração do VirtualHost
 COPY .docker/vhost.conf /etc/apache2/sites-available/000-default.conf
 
-# Limpa caches antigos de arquivos
+# Remove arquivos de cache que podem estar corrompidos
 RUN rm -f bootstrap/cache/*.php
 
 EXPOSE 80
 
-# Comando de inicialização: Migra o banco e liga o servidor
-CMD bash -c "php artisan migrate --force && php artisan config:clear && php artisan cache:clear && apache2-foreground"
+# COMANDO CORRIGIDO: 
+# 1. Reconstrói o mapa de classes (resolve o erro Class "" not found)
+# 2. Limpa caches de configuração
+# 3. Roda as migrations
+# 4. Inicia o Apache
+CMD bash -c "composer dump-autoload --optimize && php artisan config:clear && php artisan cache:clear && php artisan migrate --force && apache2-foreground"
