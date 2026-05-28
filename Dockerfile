@@ -39,4 +39,5 @@ RUN rm -f bootstrap/cache/*.php
 
 EXPOSE 80
 
-CMD bash -c "php artisan config:clear && php artisan cache:clear && php artisan optimize:clear && php artisan migrate --force && apache2-foreground"
+# CÓDIGO CORRIGIDO: Rodar as migrations ANTES de limpar o cache do banco
+CMD bash -c "php artisan migrate --force && php artisan config:clear && php artisan cache:clear && php artisan optimize:clear && apache2-foreground"
